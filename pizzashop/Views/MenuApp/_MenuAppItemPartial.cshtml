@@ -1,0 +1,36 @@
+<div class="row align-items-stretch g-3 my-2">
+    <div class="d-flex flex-wrap  gap-3">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var item in Model)
+            {
+                <div style="width: 320px;" class="shadow rounded-3 d-flex flex-column justify-content-between position-relative p-1">
+                    <div class="d-flex h-100 selectedItem" data-itemid="@item.ItemsId" data-itemName="@item.ItemName" data-ItemTax="@item.ItemTax">    
+                        <div class="m-1 d-flex align-items-center">
+                            <img src="~/Uploads/@item.ItemImage"  width="50" alt="">
+                        </div>
+                        <div class="d-flex flex-column justify-content-center m-2">
+                            <span class="text-break">@item.ItemName</span>
+                            <span class="itemAmount">₹@item.ItemAmount</span>
+                        </div>
+                    </div>
+                    <div class="corner-ribbon @(item.ItemStatus=="Veg"?"bg-success":"bg-danger") position-absolute">
+                    </div>
+                    <div class="d-flex align-self-end ">
+                        @if (item.IsFavourite == true)
+                        {
+                            <i class="fa-solid fa-heart fa-beat favourite" data-itemid="@item.ItemsId" style="color: #2b6dde;"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-regular fa-heart favourite" data-itemid="@item.ItemsId"></i>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else{
+            <div class="d-flex justify-content-center align-items-center  w-100  fs-3">No Items Found!</div>
+        }
+    </div>
+</div>

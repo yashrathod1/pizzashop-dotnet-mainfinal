@@ -1,0 +1,65 @@
+@model pizzashop_repository.ViewModels.MenuAppAddItemViewModel
+
+@{
+    int i = 0;
+}
+
+@if (Model != null)
+{
+    string collapseId = $"collapse_{Model.Id}_{i}";
+
+    <tr class="text-nowrap order-row" data-item-id="@Model.Id" data-available-qty="@Model.ItemQuantity">
+        <td class="z-1">
+            <div aria-expanded="true" aria-controls="@collapseId">
+                <i class="fa-solid fa-chevron-down"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#@collapseId"
+                   style="color: #ccced1;"></i>
+
+                <span class="fw-bold text-dark"
+                      data-bs-toggle="modal"
+                      data-bs-target="#SpecialInstruction">
+                    @Model.ItemName
+                </span>
+            </div>
+
+            <div id="@collapseId" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <ul class="mb-0">
+                        @foreach (var mod in Model.SelectedModifiers)
+                        {
+                            <li>
+                                <div class="d-flex justify-content-between">
+                                    <div>@mod.Name</div>
+                                    <div>₹@mod.Amount</div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </td>
+
+        <td class="text-center align-middle">
+            <div style="width: 100px; height: 40px"
+                 class="count border border-secondary d-flex justify-content-between align-items-center px-2 rounded">
+                <div class="cursor-pointer negative" style="cursor: pointer;">−</div>
+                <div class="value">1</div>
+                <div class="cursor-pointer positive" style="cursor: pointer;">+</div>
+            </div>
+        </td>
+
+        <td class="text-center align-middle">
+            <div class="d-flex flex-column">
+                <span class="fs-4 text-dark item-amount" data-base-amount="@Model.ItemAmount">₹@Model.ItemAmount</span>
+                <span class="text-secondary fs-6 modifier-amount" data-base-amount="@Model.TotalModifierAmount" >₹@Model.TotalModifierAmount</span>
+            </div>
+        </td>
+
+        <td class="text-center align-middle">
+            <i class="align-self-center fa-regular fa-trash-can h-100 cursor-pointer delete-item"></i>
+        </td>
+    </tr>
+
+    i++;
+}

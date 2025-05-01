@@ -1,0 +1,183 @@
+@model pizzashop_repository.ViewModels.WaitingListViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout_OrderApp.cshtml";
+    int totalWaitingTokenCount = Model.Sections.Sum(x => x.WaitingListCount);
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/kot.css">
+</head>
+
+<div class="container-fluid p-sm-0">
+    <div class="d-flex justify-content-between m-3">
+        <div class="h4 blue-color text-center text-md-start m-md-3"><strong>Waiting List</strong></div>
+        <div class="d-flex align-items-center"><button class="btn wait-token-btn  cancel-btn-color"
+                data-bs-target="#WaitingToken" data-bs-toggle="modal">+ WaitingToken</button></div>
+    </div>
+
+
+    <!-- Tabs -->
+    <div class="tabs-wrapper bg-white  m-md-3 shadow-box pt-2 ps-2">
+        <ul class="nav nav-tabs flex-column flex-sm-row " role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button"
+                    data-id="null" role="tab">
+                    <strong>All</strong>
+                    <span class="badge rounded-pill bg-secondary ms-2">
+                        @totalWaitingTokenCount
+                    </span>
+                </button>
+            </li>
+            @foreach (var sections in Model.Sections)
+            {
+                var tabId = $"tab-{sections.Id}";
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#@tabId" type="button"
+                        data-id="@sections.Id" role="tab">
+                        <strong class="text-muted">@sections.Name</strong>
+                        <span class="badge rounded-pill bg-secondary ms-2">
+                            @sections.WaitingListCount
+                        </span>
+                    </button>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <!-- Sections Tabs -->
+
+    <div class="tab-content bg-white mt-3 m-md-3 shadow-box" style="overflow-y: auto; height: 600px;">
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            <div class="p-3">
+                <div id="waitingListContainer">
+
+                </div>
+            </div>
+        </div>
+
+        @foreach (var sections in Model.Sections)
+        {
+            var tabId = $"tab-{sections.Id}";
+            <div class="tab-pane fade" id="@tabId" role="tabpanel">
+                <div class="p-3">
+                    <div id="waitingListContainer-@sections.Id">
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+
+
+@* Waiting token model *@
+<!-- Modal -->
+<div class="modal fade" id="WaitingToken" tabindex="-1">
+    @await Html.PartialAsync("_WaitingTokenModalPartial", Model.WaitingTokens);
+</div>
+
+@* modal for edit *@
+<div class="modal fade" id="editWaitingToken" tabindex="-1">
+    @await Html.PartialAsync("_WaitingTokenEditModalPartial", Model.WaitingTokens);
+</div>
+
+@* delete modal *@
+<div class="modal fade" id="deleteWaitingTokenModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <img class="warning-img" src="~/images/toppng.com-warning-icon-2400x2400.png" alt="">
+                <p>Are you sure you want to cancel the Waiting token?</p>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="button" id="confirmDeleteBtnToken" class="btn navbar-color text-white">Yes</button>
+                <button type="button" class="btn cancel-btn-color ms-1" data-bs-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Assign Table Modal *@
+<div class="modal fade" id="assignTableModal" tabindex="-1" aria-labelledby="assignTableModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        
+      <div class="modal-header">
+        <h5 class="modal-title" id="assignTableModalLabel">Assign Table</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="assignTableForm">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="sectionSelect" class="form-label">Section <span class="text-danger">*</span></label>
+              <select class="form-select" id="sectionSelect" required>
+                <option value="">Select Section</option>
+                <option value="1">Section 1</option>
+                <option value="2">Section 2</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="tableSelect" class="form-label">Table <span class="text-danger">*</span></label>
+              <select class="form-select" id="tableSelect" required>
+                <option value="">Select Table</option>
+                <option value="1">Table 1</option>
+                <option value="2">Table 2</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" form="assignTableForm" class="btn btn-primary">Assign</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+@* <div class="modal fade " id="assignTableModal" tabindex="-1" role="dialog" aria-labelledby="assignTableModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content p-3 rounded">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignTableModalLabel">Assign Table</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <select id="assignSectionDropdown" class="form-select">
+                            <option value="">Section* (<span class="text-danger">Required</span>)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div id="assignTableDropdownContainer" class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle w-100" type="button"
+                                id="assignTableDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                                Select Tables
+                            </button>
+                            <ul class="dropdown-menu w-100" id="assignTableDropdown">
+                                <!-- Table options with checkboxes will be dynamically populated -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="assignTableButton">Assign</button>
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+<script src="~/js/waitinglistview.js"></script>

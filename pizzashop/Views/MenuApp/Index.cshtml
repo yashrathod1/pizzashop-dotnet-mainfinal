@@ -1,0 +1,235 @@
+@model pizzashop_repository.ViewModels.MenuAppViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout_OrderApp.cshtml";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/menuapp.css">
+</head>
+
+<div class="row m-0">
+    <div class="col-lg-2 d-none p-0 d-lg-block bg-white">
+        <div class="h5 fw-bold m-0 px-3  mt-3 mb-3">Category</div>
+        <ul class="list-unstyled">
+            <li class="fw-bold text-muted category-item" data-type="favorite">
+                <div class="px-3 py-2">Favorite Items</div>
+            </li>
+            <li class="fw-bold category-item selected text-white" data-type="all">
+                <div class="px-3 py-2">All</div>
+            </li>
+
+            @if (Model.CategoryList != null && Model.CategoryList.Count() > 0)
+            {
+                foreach (var category in Model.CategoryList)
+                {
+                    <li class="fw-bold text-muted category-item" data-category-id="@category.Id" data-type="category">
+                        <div class="px-3 py-2">@category.Name</div>
+                    </li>
+                }
+            }
+
+        </ul>
+    </div>
+    <div class="@(ViewBag.orderId > 0 ? "col-lg-5 col-12 menu-items-section" : "col-12 col-lg-10 menu-items-section")">
+
+        <input type="hidden" id="orderId" value="@ViewBag.orderId">
+        <div class="row mt-4">
+            <div class="col-lg-5 col-md-5 d-flex justify-content-between ">
+                <div class="d-block d-lg-none">
+                    <button type="button" class="btn btn-outline-primary h-75 py-2 " data-bs-toggle="offcanvas"
+                        data-bs-target="#Category">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </button>
+                </div>
+                <div style="width:200px" class="position-relative ms-2">
+                    <div class="form-floating">
+                        <input type="text" id="searchOrders" class="form-control" placeholder="Search">
+                        <label for="searchOrders">Search Orders</label>
+                    </div>
+                    <div class="position-absolute" style="margin-top: -36px; right: 7px;"><i
+                            class="fa-solid fa-magnifying-glass "></i></div>
+                </div>
+            </div>
+            <div class="col-lg-7 col-md-7 d-flex justify-content-md-end">
+                <div class="d-flex justify-content-between align-items-center mx-2">
+                    <span style="width: 10px; height:10px" class="rounded-circle bg-success me-2"></span>
+                    <span>Vegetarian</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mx-2">
+                    <span style="width: 10px; height:10px" class="rounded-circle bg-danger me-2"></span>
+                    <span>Non-Vegetarian</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mx-2">
+                    <span style="width: 10px; height:10px" class="rounded-circle bg-warning me-2"></span>
+                    <span>Vegan</span>
+                </div>
+            </div>
+        </div>
+        <div id="ItemsCardContainer">
+            @* item partial view load here *@
+        </div>
+    </div>
+    @if ((ViewBag.orderId > 0))
+    {
+        <div class="col-lg-5 p-3">
+            <div class=" p-2 px-3 bg-white">
+                <div class="d-flex flex-column flex-md-row justify-content-md-between">
+                    <div class="d-flex gap-2">
+                        <div class="d-flex align-self-center table-img">
+                            <img src="~/images/icons/dinner-table.svg">
+                        </div>
+                        <div class="d-flex flex-column">
+                            <div id="sectionName"></div>
+                            <span><span class="fw-bold">Table : </span><span id="assignedTables"></span></span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-md-between justify-content-end">
+                        <button type="button" class="btn custom-btn-outline icon-bg h-75 py-2 text-primary"
+                            data-bs-toggle="modal" data-bs-target="#MenuQR">
+                            <i class="bi bi-qr-code-scan icon-btn"></i>
+                        </button>
+
+                        <button type="button" class="btn custom-btn-outline icon-bg h-75 py-2 text-secondary"
+                            id="CustomerDetails">
+                            <i class="bi bi-person-lines-fill icon-btn"></i>
+                        </button>
+
+                        <button type="button" class="btn custom-btn-outline icon-bg h-75 py-2 text-success"
+                            data-bs-toggle="modal" data-bs-target="#OrderComment">
+                            <i class="bi bi-chat-left-text icon-btn"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th style="width: 400px;">Items</th>
+                                <th style="width: 100px;">Quantity</th>
+                                <th style="width: 100px;">Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderedItemsList">
+
+                        </tbody>
+                    </table>
+                </div>
+                <hr>
+                <div class="d-flex flex-column">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold text-secondary fs-6">SubTotal</span>
+                        <span class="fw-bold text-secondary fs-6">₹1800</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>CGST</span>
+                        <span>₹15</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>GST</span>
+                        <span>₹15</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Others</span>
+                        <span>₹15</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="">
+                            <input type="checkbox" name="" id="">
+                            <span>SGST</span>
+                        </div>
+                        <span>₹22</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Total</span>
+                        <span>₹1900</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Payment method</span>
+                        <div class="d-flex gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+                                <label class="form-check-label" for="radioDefault1">
+                                    Cash
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+                                <label class="form-check-label" for="radioDefault1">
+                                    Card
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
+                                <label class="form-check-label" for="radioDefault1">
+                                    UPI
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="d-flex flex-column flex-md-row justify-content-md-end align-items-end align-items-md-center gap-3 mt-2">
+                    <button type="button" class="btn btn-primary ">Save</button>
+                    <button type="button" class="btn btn-outline-primary">Complete</button>
+                    <button type="button" class="btn btn-outline-primary">Generate Invoices</button>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                    <button type="button" class="btn btn-outline-primary  ">Cancel</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+@* offcanvas for small screen *@
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="Category" aria-labelledby="offcanvasExampleLabel"
+    data-bs-backdrop="false">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-unstyled w-100">
+            <li class="fw-bold text-muted category-item" data-type="favorite">
+                <div class="px-3 py-2">Favorite Items</div>
+            </li>
+            <li class="fw-bold category-item selected text-white" data-type="all">
+                <div class="px-3 py-2">All</div>
+            </li>
+
+            @if (Model.CategoryList != null && Model.CategoryList.Count() > 0)
+            {
+                foreach (var category in Model.CategoryList)
+                {
+                    <li class="fw-bold text-muted category-item" data-type="category" data-category-id="@category.Id">
+                        <div class="px-3 py-2">@category.Name</div>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+</div>
+
+@* modal to get modifier in the item card*@
+
+<div class="modal fade" id="ModifiersList" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div id="modifierDetailContainer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script src="~/js/menuappview.js"></script>
