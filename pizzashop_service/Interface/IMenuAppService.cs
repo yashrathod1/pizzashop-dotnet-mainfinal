@@ -15,4 +15,6 @@ public interface IMenuAppService
      Task<MenuAppTableSectionViewModel> GetTableDetailsByOrderIdAsync(int orderId);
 
      Task<MenuAppAddItemViewModel> AddItemInOrder(int itemId, List<int> modifierIds);
+
+     Task<MenuAppOrderSummaryViewModel> GetOrderSummaryAsync(decimal subTotal);
 }

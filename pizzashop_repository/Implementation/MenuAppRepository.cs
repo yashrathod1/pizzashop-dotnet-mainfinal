@@ -97,5 +97,12 @@ public class MenuAppRepository : IMenuAppRepository
         }
     }
 
+    public async Task<List<Taxesandfee>> GetAllTaxesAsync()
+    {
+        return await _context.Taxesandfees
+            .Where(t => !t.Isdeleted)
+            .ToListAsync();
+    }
+
 }
 

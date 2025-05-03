@@ -190,12 +190,19 @@ $(document).on('click', '#AddToOrder', function () {
             ModifierIds: selectedModifierIds
         },
         success: function (html) {
+            $('#orderedItemsList .no-data').remove();
             $('#orderedItemsList').append(html);
             $('#ModifiersList').modal('hide');
             selectedModifiers = {};
+            loadOrderTaxPartial();
+
+            $('#saveBtn').prop('disabled', false);
         }
     });
 });
+
+
+
 
 
 // update item price as quantity increase and decrease
@@ -230,6 +237,7 @@ $(document).on('click', '.positive', function () {
         currentQty++;
         $valueSpan.text(currentQty);
         updateAmounts($row, currentQty);
+        loadOrderTaxPartial();
     } else {
         toastr.warning(`You cannot select more quantity than available quantity ${availableQty}!`);
     }
@@ -245,11 +253,148 @@ $(document).on('click', '.negative', function () {
         $valueSpan.text(quantity);
         var $row = $(this).closest('tr');
         updateAmounts($row, quantity);
+        loadOrderTaxPartial();
     }
 });
 
 
 $(document).on('click', '.delete-item', function () {
     $(this).closest('tr').remove();
+    loadOrderTaxPartial();
+    if ($('#orderedItemsList tr').length === 0) {
+        $('#orderedItemsList').html(`
+            <tr class="no-data">
+                <td colspan="5" class="text-center">No data found</td>
+            </tr>
+        `);
+        }
+        $('#saveBtn, #completeBtn, #invoiceBtn').prop('disabled', true);
 });
 
+function calculateSubTotal() {
+    let subTotal = 0;
+
+    $('#orderedItemsList .order-row').each(function () {
+        let itemAmount = parseFloat($(this).find('.item-amount').data('base-amount'));
+        let modifierAmount = parseFloat($(this).find('.modifier-amount').data('base-amount'));
+        let quantity = parseInt($(this).find('.value').text());
+
+        if (!isNaN(itemAmount) && !isNaN(modifierAmount) && !isNaN(quantity)) {
+            subTotal += (itemAmount + modifierAmount) * quantity;
+        }
+    });
+
+    return subTotal;
+}
+
+function calculateAndRenderTaxSummary() {
+    let subTotal = calculateSubTotal();
+    let taxTotal = 0;
+
+    $('#tax-summary .tax-amount').each(function () {
+        let $this = $(this);
+        let rate = parseFloat($this.data('rate'));
+        let type = $this.data('type');
+        let isDefault = $this.data('default') === true || $this.data('default') === "true";
+
+        let amount = 0;
+
+        if (type === "Flat Amount") {
+            if (isDefault || $this.closest('.d-flex').find('.tax-checkbox').is(':checked')) {
+                amount = rate;
+            }
+        } else if (type === "Percentage") {
+            if (isDefault || $this.closest('.d-flex').find('.tax-checkbox').is(':checked')) {
+                amount = (subTotal * rate) / 100;
+            }
+        }
+
+        $this.text('₹' + amount.toFixed(2));
+        taxTotal += amount;
+    });
+
+    let grandTotal = subTotal + taxTotal;
+    $('#tax-total').text('₹' + taxTotal.toFixed(2));
+    $('#grand-total').text('₹' + grandTotal.toFixed(2));
+}
+
+
+
+function loadOrderTaxPartial() {
+    let subTotal = calculateSubTotal();
+
+    let checkedTaxRates = [];
+    $('.tax-checkbox:checked').each(function () {
+        let rate = $(this).data('rate');
+        checkedTaxRates.push(rate);
+    });
+
+    $.ajax({
+        url: '/MenuApp/LoadOrderTaxSummary',
+        type: 'GET',
+        data: { subTotal: subTotal },
+        success: function (html) {
+            $('#orderTaxSummaryContainer').html(html);
+
+            $('.tax-checkbox').each(function () {
+                let rate = $(this).data('rate');
+                if (checkedTaxRates.includes(rate)) {
+                    $(this).prop('checked', true);
+                }
+            });
+
+            $('.tax-checkbox').on('change', function () {
+                calculateAndRenderTaxSummary();
+            });
+
+            calculateAndRenderTaxSummary();
+        }
+    });
+}
+
+
+// save order into db
+$(document).on('click','#saveBtn' ,function () {
+    var orderData = {
+        items: [],
+        subtotal: 0,
+        total: 0,
+        taxes: []
+    };
+
+    $('.order-row').each(function () {
+        var $row = $(this);
+        var itemId = $row.data('item-id');
+        var quantity = parseInt($row.find('.quantity-input').val());
+        var itemAmount = parseFloat($row.find('.item-amount').text().replace('₹', ''));
+        var modifierAmount = parseFloat($row.find('.modifier-amount').text().replace('₹', ''));
+
+        var modifiers = [];
+        $row.find('.modifier-checkbox:checked').each(function () {
+            modifiers.push({
+                modifierId: $(this).data('modifier-id'),
+                modifierPrice: parseFloat($(this).data('price'))
+            });
+        });
+
+        orderData.items.push({
+            itemId: itemId,
+            quantity: quantity,
+            itemAmount: itemAmount,
+            modifierAmount: modifierAmount,
+            modifiers: modifiers
+        });
+
+        orderData.subtotal += (itemAmount + modifierAmount);
+    });
+
+    $.ajax({
+        url: '/Order/SaveOrder',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(orderData),
+        success: function (response) {
+            toastr.success('Order saved!'); 
+        }
+    });
+});

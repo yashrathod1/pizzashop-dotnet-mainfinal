@@ -17,4 +17,6 @@ public interface IMenuAppRepository
      Task<List<OrdersTableMapping>> GetTableDetailsByOrderIdAsync(int orderId);
 
      Task<List<Modifier>> GetModifiersByIds(List<int> ids);
+
+     Task<List<Taxesandfee>> GetAllTaxesAsync();
 }

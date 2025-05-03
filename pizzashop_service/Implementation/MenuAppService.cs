@@ -109,7 +109,7 @@ public class MenuAppService : IMenuAppService
             }).ToList();
 
             return new MenuAppModifierDetailViewModel
-            {   
+            {
                 ItemQuantity = item.Quantity,
                 ItemId = item.Id,
                 ItemName = item.Name,
@@ -172,5 +172,26 @@ public class MenuAppService : IMenuAppService
             }).ToList(),
         };
     }
+
+    public async Task<MenuAppOrderSummaryViewModel> GetOrderSummaryAsync(decimal subTotal)
+    {
+        var taxes = await _menuAppRepository.GetAllTaxesAsync();
+
+        var taxSummaries = taxes.Select(t => new MenuAppOrderTaxSummaryViewModel
+        {
+            Name = t.Name,
+            Value = t.Value,
+            IsEnable = t.Isenabled,
+            IsDefault = t.Isdefault,
+            Type = t.Type
+        }).ToList();
+
+        return new MenuAppOrderSummaryViewModel
+        {
+            Subtotal = subTotal,
+            Taxes = taxSummaries
+        };
+    }
+
 
 }

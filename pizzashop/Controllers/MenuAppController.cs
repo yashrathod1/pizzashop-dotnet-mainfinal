@@ -97,5 +97,10 @@ public class MenuAppController : Controller
         }
     }
 
+    public async Task<IActionResult> LoadOrderTaxSummary(decimal subTotal)
+    {
+        var summaryViewModel = await _menuAppService.GetOrderSummaryAsync(subTotal);
+        return PartialView("_OrderTaxPartial", summaryViewModel);
+    }
 
 }

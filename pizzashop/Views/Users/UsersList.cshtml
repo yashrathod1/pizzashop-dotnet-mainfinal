@@ -14,18 +14,18 @@
     <div class="d-flex">
         <form method="get" action="@Url.Action("UsersList")" class="d-flex">
             <div class="form-group position-relative">
-                <input type="text" id="searchUsers" name="searchTerm" class="form-control search-input"
+                <input type="text" id="searchUsers" name="searchTerm" class="form-control search-input p-3"
                     placeholder="Search" onkeyup="searchUsers()" autocomplete="off">
 
-                <button type="submit" class="search-icon border-0 bg-transparent">
-                    <img src="~/images/icons/search.svg" alt="">
+                <button type="submit" class="search-icon  border-0 bg-transparent">
+                    <img class="position-absolute" style="margin-left: -12px;" src="~/images/icons/search.svg" alt="">
                 </button>
 
             </div>
         </form>
         @if (perms?.CanaddEdit == true)
         {
-            <div><a class="btn navbar-color text-white" asp-action="AddUser" asp-controller="Users">+Add User</a></div>
+            <div><a class="btn navbar-color text-white p-3" asp-action="AddUser" asp-controller="Users">+Add User</a></div>
         }
     </div>
 </div>
