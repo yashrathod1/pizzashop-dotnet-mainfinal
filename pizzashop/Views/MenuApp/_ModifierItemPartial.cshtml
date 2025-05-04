@@ -12,7 +12,9 @@
     {
         foreach (var modifierGroup in Model.ModifierGroups)
         {
-            <div class="mb-3" data-min-quantity="@modifierGroup.MinQuantity" data-max-quantity="@modifierGroup.MaxQuantity" data-modifier-group-id="@modifierGroup.ModifierGroupId">
+            <div class="mb-3" data-min-quantity="@modifierGroup.MinQuantity"
+            
+             data-max-quantity="@modifierGroup.MaxQuantity" data-modifier-group-id="@modifierGroup.ModifierGroupId">
                 <h5 class="fw-bold text-muted mb-1">
                     @modifierGroup.ModifierGroupName
                     <small class="fw-normal text-muted ms-1">
@@ -26,7 +28,9 @@
                         foreach (var modifier in modifierGroup.Modifiers)
                         {
                             <div class="modifier-box p-2 position-relative" style="width: 170px; cursor: pointer;"
-                                data-modifier-id="@modifier.Id">
+                                data-modifier-id="@modifier.Id"
+                                data-modifier-qty="@modifier.Quantity"
+                                data-modifier-name="@modifier.Name">
                                 <div class="d-flex flex-column">
                                     <span class="fw-semibold">@modifier.Name</span>
                                     <span class="text-muted">₹@modifier.Amount</span>

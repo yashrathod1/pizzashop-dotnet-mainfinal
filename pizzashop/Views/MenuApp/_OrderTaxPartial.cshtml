@@ -11,7 +11,7 @@
     @foreach (var tax in Model.Taxes)
     {
         decimal taxAmount = tax.Type == "Flat Amount"
-            ? tax.Value
+            ? tax.Value 
             : (Model.Subtotal * tax.Value) / 100;
 
         <div class="d-flex justify-content-between align-items-center mb-1">

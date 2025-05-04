@@ -105,15 +105,34 @@ function fetchTableInfo(orderId) {
 
 
 //modifiermodal
-var selectedModifiers = {};
-
 $(document).on('click', '.modifier-box', function () {
     var groupDiv = $(this).closest('.mb-3');
-
     var modifierGroupId = groupDiv.data('modifier-group-id');
     var modifierId = $(this).data('modifier-id');
-    var maxCount = parseInt(groupDiv.data('max-quantity'));
+    var modifierName = $(this).data('modifier-name');
+    var modifierQty = parseInt($(this).data('modifier-qty'));
+    var maxCount = parseInt(groupDiv.data('max-quantity')) || 0;
 
+    // Check existing usage of this modifier
+    var totalUsedQty = 0;
+    $('.order-row').each(function () {
+        var itemId = $('#itemTitle').data('item-id');
+        if ($(this).data('item-id') == itemId) {
+            var qty = parseInt($(this).find('.value').text());
+            var modIds = $(this).data('modifier-ids').toString().split(',');
+
+            if (modIds.includes(modifierId.toString())) {
+                totalUsedQty += qty;
+            }
+        }
+    });
+
+    if (totalUsedQty >= modifierQty) {
+        toastr.warning(`Modifier '${modifierName}' has already been used with quantity ${totalUsedQty}. Max allowed is ${modifierQty}.`);
+        return;
+    }
+
+    // Proceed with selection logic
     if (!selectedModifiers[modifierGroupId]) {
         selectedModifiers[modifierGroupId] = [];
     }
@@ -137,6 +156,7 @@ $(document).on('click', '.modifier-box', function () {
     checkMinSelection();
     console.log("selectedModifiers", selectedModifiers);
 });
+
 
 
 
@@ -201,21 +221,17 @@ $(document).on('click', '#AddToOrder', function () {
     });
 });
 
-
-
-
-
 // update item price as quantity increase and decrease
 
 function updateAmounts($row, quantity) {
     var baseItemAmount = parseFloat($row.find('.item-amount').data('base-amount'));
-    var baseModifierAmount = parseFloat($row.find('.modifier-amount').data('base-amount'));
+    var baseModifierAmount = parseFloat($row.find('.totalmodifier-amount').data('base-amount'));
 
     var totalItemAmount = baseItemAmount * quantity;
     var totalModifierAmount = baseModifierAmount * quantity;
 
     $row.find('.item-amount').text('₹' + totalItemAmount.toFixed(2));
-    $row.find('.modifier-amount').text('₹' + totalModifierAmount.toFixed(2));
+    $row.find('.totalmodifier-amount').text('₹' + totalModifierAmount.toFixed(2));
 }
 
 $(document).on('click', '.positive', function () {
@@ -276,7 +292,7 @@ function calculateSubTotal() {
 
     $('#orderedItemsList .order-row').each(function () {
         let itemAmount = parseFloat($(this).find('.item-amount').data('base-amount'));
-        let modifierAmount = parseFloat($(this).find('.modifier-amount').data('base-amount'));
+        let modifierAmount = parseFloat($(this).find('.totalmodifier-amount').data('base-amount'));
         let quantity = parseInt($(this).find('.value').text());
 
         if (!isNaN(itemAmount) && !isNaN(modifierAmount) && !isNaN(quantity)) {
@@ -353,8 +369,7 @@ function loadOrderTaxPartial() {
 }
 
 
-// save order into db
-$(document).on('click','#saveBtn' ,function () {
+$(document).on('click', '#saveBtn', function () {
     var orderData = {
         items: [],
         subtotal: 0,
@@ -362,39 +377,70 @@ $(document).on('click','#saveBtn' ,function () {
         taxes: []
     };
 
+    // Collect items
     $('.order-row').each(function () {
         var $row = $(this);
         var itemId = $row.data('item-id');
-        var quantity = parseInt($row.find('.quantity-input').val());
-        var itemAmount = parseFloat($row.find('.item-amount').text().replace('₹', ''));
-        var modifierAmount = parseFloat($row.find('.modifier-amount').text().replace('₹', ''));
+        var itemName = $row.find('.item-name').data('iname'); // Or use .text().trim()
+        var quantity = parseInt($row.find('.quantity-input').text()) || 1;
+        var itemAmount = parseFloat($row.find('.item-amount').text().replace('₹', '')) || 0;
+        var modifierAmount = parseFloat($row.find('.totalmodifier-amount').text().replace('₹', '')) || 0;
 
         var modifiers = [];
-        $row.find('.modifier-checkbox:checked').each(function () {
+        $row.find('.accordion-body li').each(function () {
+            var $mod = $(this);
+            var modName = $mod.find('.modifier-name').data('mname');
+            var modAmount = parseFloat($mod.find('.modifier-amount').data('mamount')) || 0;
+
             modifiers.push({
-                modifierId: $(this).data('modifier-id'),
-                modifierPrice: parseFloat($(this).data('price'))
+                modifierName: modName,
+                modifierPrice: modAmount
             });
         });
 
         orderData.items.push({
             itemId: itemId,
+            itemName: itemName,
             quantity: quantity,
             itemAmount: itemAmount,
             modifierAmount: modifierAmount,
             modifiers: modifiers
         });
 
-        orderData.subtotal += (itemAmount + modifierAmount);
+        orderData.subtotal += (itemAmount + modifierAmount) * quantity;
     });
 
+    // Collect taxes (if applicable)
+    $('.tax-row').each(function () {
+        var $tax = $(this);
+        var taxId = $tax.data('tax-id');
+        var taxAmount = parseFloat($tax.find('.tax-amount').text().replace('₹', '')) || 0;
+
+        orderData.taxes.push({
+            taxId: taxId,
+            taxAmount: taxAmount
+        });
+
+        orderData.total += taxAmount;
+    });
+
+    // Add subtotal to total
+    orderData.total += orderData.subtotal;
+
+    console.log("data is",orderData);
+
+    // Send to controller
     $.ajax({
-        url: '/Order/SaveOrder',
+        url: '/MenuApp/SaveOrder',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(orderData),
         success: function (response) {
-            toastr.success('Order saved!'); 
+            toastr.success('Order saved!');
+        },
+        error: function () {
+            toastr.error('Failed to save order.');
         }
     });
 });
+

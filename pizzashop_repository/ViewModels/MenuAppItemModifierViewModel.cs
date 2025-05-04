@@ -31,4 +31,6 @@ public class MenuAppItemModifiersViewModel
     public string Name { get; set; } = null!;
 
     public decimal Amount { get; set;} 
+
+    public int Quantity { get; set; }
 }

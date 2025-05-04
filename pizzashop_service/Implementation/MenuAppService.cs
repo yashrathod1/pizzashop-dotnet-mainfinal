@@ -102,7 +102,8 @@ public class MenuAppService : IMenuAppService
                                                                     {
                                                                         Id = mgm.Modifier.Id,
                                                                         Name = mgm.Modifier.Name,
-                                                                        Amount = mgm.Modifier.Price
+                                                                        Amount = mgm.Modifier.Price,
+                                                                        Quantity = mgm.Modifier.Quantity
                                                                     }).ToList()
 
 

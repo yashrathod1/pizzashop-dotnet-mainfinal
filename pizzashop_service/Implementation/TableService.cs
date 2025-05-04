@@ -37,7 +37,7 @@ public class TableService : ITableService
                 SectionId = t.Sectionid,
                 Capacity = t.Capacity,
                 Status = t.Status,
-                OrderTableTime = t.OrdersTableMappings.Select(ot => ot.Order.Createdat ).FirstOrDefault(),
+                OrderTableTime = t.OrdersTableMappings.Where(ot => ot.Order.Status == "Pending").Select(ot => ot.Order.Createdat ).FirstOrDefault(),
                 TotalAmount = t.OrdersTableMappings.OrderByDescending(ot => ot.Createdat).SelectMany(ot => ot.Order?.OrderItemsMappings ?? Enumerable.Empty<OrderItemsMapping>()).Sum(oim => oim.TotalPrice)
             }).ToList(),
         };
@@ -204,7 +204,7 @@ public class TableService : ITableService
         var order = new Order
         {
             Customerid = customer.Id,
-            Status = "In Progress",
+            Status = "Pending",
             Createdat = DateTime.Now
         };
 

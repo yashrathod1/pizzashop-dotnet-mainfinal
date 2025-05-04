@@ -24,30 +24,30 @@ public class MenuController : Controller
         RolePermissionViewModel? permission = await PermissionHelper.GetPermissionsAsync(HttpContext, "Menu");
         ViewBag.Permissions = permission;
 
-        List<CategoryViewModel>? categories = await _menuService.GetCategoriesAsync();
+        // List<CategoryViewModel>? categories = await _menuService.GetCategoriesAsync();
 
-        categories = categories.OrderBy(c => c.Id).ToList();
+        // categories = categories.OrderBy(c => c.Id).ToList();
 
-        List<ItemViewModel>? items = await _menuService.GetItemsAsync();
+        // List<ItemViewModel>? items = await _menuService.GetItemsAsync();
 
-        items = items.OrderBy(i => i.Id).ToList();
+        // items = items.OrderBy(i => i.Id).ToList();
 
         List<ModifierGroupViewModel>? modifierGroup = await _menuService.GetModifierGroupAsync();
 
         modifierGroup = modifierGroup.OrderBy(mg => mg.Id).ToList();
 
-        List<ModifierViewModel>? modifiers = await _menuService.GetModifiersAsync();
+        // List<ModifierViewModel>? modifiers = await _menuService.GetModifiersAsync();
 
-        modifiers = modifiers.OrderBy(m => m.Id).ToList();
+        // modifiers = modifiers.OrderBy(m => m.Id).ToList();
 
-        Task<List<ModifierViewModel>>? pageModifiers = _menuService.GetModifiersAsync();
+        // Task<List<ModifierViewModel>>? pageModifiers = _menuService.GetModifiersAsync();
 
         MenuItemViewModel? viewmodel = new MenuItemViewModel
         {
-            Categories = categories,
-            Items = items,
-            ModifierGroup = modifierGroup,
-            Modifiers = modifiers,
+            // Categories = categories,
+            // Items = items,
+            ModifierGroup = modifierGroup
+            // Modifiers = modifiers,
 
         };
 

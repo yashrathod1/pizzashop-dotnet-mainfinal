@@ -1,7 +1,7 @@
 $(document).ready(function () {
     loadCategories();
 
-    loadModifiers(1);
+    // loadModifiers(1);
 
     $("#addEditCategoryForm").submit(function (e) {
         e.preventDefault();
